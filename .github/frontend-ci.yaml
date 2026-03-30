@@ -1,0 +1,56 @@
+name: Pipeline for mern-frontend
+on:
+ push:
+    branches:
+     - main
+    paths:
+     - "client/**"
+     - ".github/workflows/frontend-ci.yaml"
+
+concurrency:
+  group: client-deploy
+  cancel-in-progress: true 
+
+permissions:
+ id-token: write
+ contents: read
+
+defaults:
+ run:
+  working-directory: client
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v4
+
+            - name: setup node
+              uses: actions/setup-node@v4
+              with:
+                node-version: 18
+                cache: 'npm'
+
+            - name: Install Dependencies
+              run: npm install
+
+            - name: Build Project
+              run: npm run build
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+               role-to-assume: arn:aws:iam::746387399152:role/GITHUB-OIDC-ROLE # Add the ARN of the role
+               role-session-name: github-oidc-session # you can give any name.
+               aws-region: us-west-1
+
+            - name: Upload to S3
+              run: |
+                aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
+
+            - name: Invalidate CloudFront Cache
+              run: |
+                aws cloudfront create-invalidation \
+                --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+                --paths "/*"
