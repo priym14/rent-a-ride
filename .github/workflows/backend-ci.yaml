@@ -1,0 +1,55 @@
+name: CI/CD for rend-a-ride-backend
+
+on:
+  push:
+    branches:
+        - main
+    paths:
+        - 'backend/**'
+        - 'github/workflows/backend-ci.yaml'
+
+permissions:
+  id-token: write      # Required for OIDC authentication
+  contents: read       # Required for actions/checkout
+
+jobs:
+  Build:
+    name: Build and Push to ECR
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      #  Configure AWS credentials (OIDC)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::746387399152:role/GITHUB-OIDC-ROLE
+          role-session-name: github-oidc-session
+          aws-region: us-west-1
+
+      # Login to ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get commit hash
+        id: get-commit-hash
+        run: echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Get branch
+        id: get-branch
+        run: echo "branch=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
+
+      # Build the Docker image
+      - name: Build Docker image
+        id: build-image
+        env: 
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: rent-a-ride-backend
+          IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit_hash }}-${{ steps.get-branch.outputs.branch }}
+        run: | 
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
