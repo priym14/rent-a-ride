@@ -60,6 +60,8 @@ App.use("/api/vendor",vendorRoute)
 
 
 App.use((err, req, res, next) => {
+  console.error("ERROR:", err);   // 🔥 ADD THIS LINE
+
   const statusCode = err.statusCode || 500;
   const message = err.message || "internal server error";
   return res.status(statusCode).json({
