@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-svc
+  namespace: ecom
+spec:
+  clusterIP: None   # headless
+  selector:
+    app: mongodb
+  ports:
+    - port: 27017
+      targetPort: 27017

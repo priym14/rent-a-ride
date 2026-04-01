@@ -25,7 +25,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/backend ./backend
 
 # Expose app port
-EXPOSE 5000
+EXPOSE 3000
 
 # Run app
 CMD ["node", "backend/server.js"]

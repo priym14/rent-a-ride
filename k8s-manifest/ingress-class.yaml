@@ -1,0 +1,15 @@
+# IngressClass definition
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: aws-ingress-class-alb
+  # Optional: set as default for Ingresses without a specified class
+ # annotations:
+ #   ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: ingress.k8s.aws/alb 
+  # Optional: reference IngressClassParams for extra config (like 'internet-facing' scheme)
+  # parameters:
+  #   apiGroup: elbv2.k8s.aws/v1beta1
+  #   kind: IngressClassParams
+  #   name: internet-facing-params 
