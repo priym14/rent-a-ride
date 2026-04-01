@@ -45,6 +45,10 @@ App.use(
 
 App.use('*', cloudinaryConfig);
 
+App.get("/health", (req, res) => {
+  res.status(200).send("healthy");
+});
+
 // App.get('/*', (req, res) => res.sendFile(resolve(__dirname, '../public/index.html')));
 
 
