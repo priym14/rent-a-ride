@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: 746387399152.dkr.ecr.us-west-1.amazonaws.com/rent-a-ride-backend:6f11ea0ea-main
+          image: 746387399152.dkr.ecr.us-west-1.amazonaws.com/rent-a-ride-backend:8e1bc0905-main
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
